@@ -175,7 +175,7 @@
         const pinPopupClose = document.getElementById('pin-popup-close');
 
         // DEFAULT PIN: Silakan ubah angka ini jika ingin PIN lain
-        const SECRET_PIN = "0404";
+        const SECRET_PIN = "2102";
 
         let pinAttempt = 0;
         let popupTimeout = null;
@@ -399,13 +399,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     // Hapus class lama
                     modalIframe.classList.remove('iframe-spotify', 'iframe-youtube', 'iframe-facebook');
 
-                    // Deteksi platform untuk penyesuaian rasio (16:9 untuk YouTube, Kotak untuk Spotify, 9:16 untuk Facebook)
-                    if (embedUrl.includes('youtube.com') || embedUrl.includes('youtu.be')) {
-                        modalIframe.classList.add('iframe-youtube');
-                    } else if (embedUrl.includes('spotify.com')) {
+                    // Deteksi platform untuk penyesuaian rasio (Kotak untuk Spotify, 9:16 untuk Facebook, 16:9 untuk YouTube/Video Web)
+                    if (embedUrl.includes('spotify.com')) {
                         modalIframe.classList.add('iframe-spotify');
                     } else if (embedUrl.includes('facebook.com')) {
                         modalIframe.classList.add('iframe-facebook');
+                    } else {
+                        modalIframe.classList.add('iframe-youtube');
                     }
 
                     const customCaption = this.getAttribute('data-caption');
@@ -424,12 +424,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 // C. JIKA YANG DIKLIK ADALAH POLAROID
                 else if (this.classList.contains('polaroid')) {
                     modalImg.src = this.querySelector('img').src;
-                    modalImg.style.aspectRatio = "1 / 1";
+                    modalImg.style.aspectRatio = "3 / 4";
                 }
-                // D. JIKA YANG DIKLIK ADALAH GALERI CINTA
+                // D. JIKA YANG DIKLIK ADALAH GALERI CINTA (Core Memories)
                 else {
                     modalImg.src = this.src;
-                    modalImg.style.aspectRatio = "9 / 16";
+                    const parentCard = this.closest('.scratch-card');
+                    const allCards = Array.from(document.querySelectorAll('.gallery-scroll .scratch-card'));
+                    const cardIndex = parentCard ? allCards.indexOf(parentCard) : 0;
+                    modalImg.style.aspectRatio = (cardIndex === 0) ? "9 / 16" : "3 / 2";
                 }
 
                 modal.classList.add('show-modal');
@@ -768,8 +771,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let drawMoveCount = 0;
 
         setTimeout(() => {
-            canvas.width = 220;
-            canvas.height = Math.round(220 * 16 / 9);
+            if (index === 0) {
+                canvas.width = 250;
+                canvas.height = Math.round(250 * 16 / 9);
+            } else {
+                canvas.width = 360;
+                canvas.height = Math.round(360 * 2 / 3);
+            }
 
             ctx.fillStyle = '#FFF8E1';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -823,8 +831,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const canvasRect = canvas.getBoundingClientRect();
-                const x = clientX - canvasRect.left;
-                const y = clientY - canvasRect.top;
+                const scaleX = canvasRect.width > 0 ? (canvas.width / canvasRect.width) : 1;
+                const scaleY = canvasRect.height > 0 ? (canvas.height / canvasRect.height) : 1;
+                const x = (clientX - canvasRect.left) * scaleX;
+                const y = (clientY - canvasRect.top) * scaleY;
 
                 ctx.lineWidth = brushRadius * 2;
                 ctx.lineCap = 'round';
